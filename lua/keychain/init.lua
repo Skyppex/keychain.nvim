@@ -1,3 +1,10 @@
+--- @class Keychain
+--- @field buf_name function
+--- @field setup function<KeychainOpts>
+--- @field open function
+--- @field close function
+--- @field save_and_close function
+
 local M = {}
 
 local keychain_buf_name = "keychain://editor"
@@ -6,6 +13,7 @@ function M.buf_name()
 	return keychain_buf_name
 end
 
+--- @param opts KeychainOpts
 function M.setup(opts)
 	require("keychain.config").configure(opts)
 end

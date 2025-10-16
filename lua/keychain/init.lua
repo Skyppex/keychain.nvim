@@ -14,6 +14,8 @@ function M.open()
 	local config = require("keychain.config").config
 	local utils = require("keychain.utils")
 
+	config.hooks.before_buf_create()
+
 	-- create buffer
 	local buf = vim.api.nvim_create_buf(false, true)
 	vim.api.nvim_set_option_value("buftype", "acwrite", { buf = buf })
@@ -33,6 +35,8 @@ function M.open()
 	vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
 	vim.api.nvim_buf_set_var(buf, "reg_map", reg_map)
 
+	config.hooks.before_win_open(buf)
+
 	-- floating window setup
 	local width = math.floor(vim.o.columns * 0.6)
 	local height = math.min(26, math.floor(vim.o.lines * 0.6))
@@ -51,13 +55,16 @@ function M.open()
 		title_pos = "center",
 	})
 
-	config.hooks.on_win_open(buf, win)
+	config.hooks.after_win_open(buf, win)
 
-	local number = vim.api.nvim_get_option_value("number", { scope = "global" })
-	local relativenumber = vim.api.nvim_get_option_value("relativenumber", { scope = "global" })
-	vim.api.nvim_set_option_value("number", number, { win = win })
-	vim.api.nvim_set_option_value("relativenumber", relativenumber, { win = win })
 	vim.api.nvim_set_option_value("numberwidth", 2, { win = win })
+
+	if config.linenumbers then
+		local number = vim.api.nvim_get_option_value("number", { scope = "global" })
+		local relativenumber = vim.api.nvim_get_option_value("relativenumber", { scope = "global" })
+		vim.api.nvim_set_option_value("number", number, { win = win })
+		vim.api.nvim_set_option_value("relativenumber", relativenumber, { win = win })
+	end
 
 	-- setup sign column
 	vim.fn.sign_unplace("registers")
@@ -80,6 +87,7 @@ function M.open()
 	vim.api.nvim_create_autocmd("BufWriteCmd", {
 		buffer = buf,
 		callback = function()
+			config.hooks.before_save(buf, win)
 			local new_lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
 			local map = vim.api.nvim_buf_get_var(buf, "reg_map")
 
@@ -89,6 +97,8 @@ function M.open()
 					vim.fn.setreg(reg_name, utils.display_to_reg(line))
 				end
 			end
+
+			config.hooks.after_save(buf, win)
 		end,
 	})
 end
@@ -106,10 +116,13 @@ local function get_all_keychain_windows(buf)
 end
 
 local function handle_close(buf)
+	local config = require("keychain.config").config
 	local windows = get_all_keychain_windows(buf)
 
 	for _, win in ipairs(windows) do
+		config.hooks.before_win_close(buf, win)
 		vim.api.nvim_win_close(win, true)
+		config.hooks.after_win_close(buf)
 	end
 end
 

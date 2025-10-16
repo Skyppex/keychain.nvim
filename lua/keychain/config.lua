@@ -1,21 +1,31 @@
 local M = {}
 
 M.default_config = {
-	save_on_close = false,
 	signcolumn = true,
+	linenumbers = true,
 	hooks = {
-		on_win_open = function(buf, win) end,
-		on_win_close = function(buf, win) end,
+		before_buf_create = function() end,
+		before_win_open = function(buf) end,
+		after_win_open = function(buf, win) end,
+		before_save = function(buf, win) end,
+		after_save = function(buf, win) end,
+		before_win_close = function(buf, win) end,
+		after_win_close = function(buf) end,
 	},
 }
 
 --- @class Hooks
---- @field on_win_open function<string, string>
---- @field on_win_close function<string, string>
+--- @field before_buf_create function
+--- @field before_win_open function<number>
+--- @field after_win_open function<number, number>
+--- @field before_save function<number, number>
+--- @field after_save function<number, number>
+--- @field before_win_close function<number, number>
+--- @field after_win_close function<number>
 ---
 --- @class Configuration
---- @field save_on_close boolean
 --- @field signcolumn boolean
+--- @field linenumbers boolean
 --- @field hooks Hooks
 ---
 --- @type Configuration

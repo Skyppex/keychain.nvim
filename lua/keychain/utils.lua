@@ -1,5 +1,63 @@
 local M = {}
 
+M.ordered_signcolumns = {
+	"RegisterSign_a",
+	"RegisterSign_b",
+	"RegisterSign_c",
+	"RegisterSign_d",
+	"RegisterSign_e",
+	"RegisterSign_f",
+	"RegisterSign_g",
+	"RegisterSign_h",
+	"RegisterSign_i",
+	"RegisterSign_j",
+	"RegisterSign_k",
+	"RegisterSign_l",
+	"RegisterSign_m",
+	"RegisterSign_n",
+	"RegisterSign_o",
+	"RegisterSign_p",
+	"RegisterSign_q",
+	"RegisterSign_r",
+	"RegisterSign_s",
+	"RegisterSign_t",
+	"RegisterSign_u",
+	"RegisterSign_v",
+	"RegisterSign_w",
+	"RegisterSign_x",
+	"RegisterSign_y",
+	"RegisterSign_z",
+}
+
+M.alphabet = {
+	"a",
+	"b",
+	"c",
+	"d",
+	"e",
+	"f",
+	"g",
+	"h",
+	"i",
+	"j",
+	"k",
+	"l",
+	"m",
+	"n",
+	"o",
+	"p",
+	"q",
+	"r",
+	"s",
+	"t",
+	"u",
+	"v",
+	"w",
+	"x",
+	"y",
+	"z",
+}
+
 --- @return table<string, string>
 function M.get_registers()
 	local regs = {}

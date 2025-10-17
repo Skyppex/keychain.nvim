@@ -7,7 +7,107 @@
 
 local M = {}
 
+local utils = require("keychain.utils")
+
 local keychain_buf_name = "keychain://editor"
+
+local function get_all_keychain_windows(buf)
+	local wins = {}
+
+	for _, win in ipairs(vim.api.nvim_list_wins()) do
+		if vim.api.nvim_win_get_buf(win) == buf then
+			table.insert(wins, win)
+		end
+	end
+
+	return wins
+end
+
+local function handle_close(buf)
+	local config = require("keychain.config").config
+	local wins = get_all_keychain_windows(buf)
+
+	for _, win in ipairs(wins) do
+		config.hooks.before_win_close(buf, win)
+		vim.api.nvim_win_close(win, true)
+		config.hooks.after_win_close(buf)
+	end
+end
+
+local function set_sign(buf, i, sign_name, text)
+	vim.fn.sign_define(sign_name, {
+		text = text,
+		texthl = "Comment",
+		numhl = "",
+	})
+
+	vim.fn.sign_place(1000 + i, "registers", sign_name, buf, { lnum = i })
+end
+
+local function set_signs(buf, regs)
+	-- setup sign column
+	vim.fn.sign_unplace("registers")
+
+	for i, reg in ipairs(regs) do
+		local sign_name = utils.ordered_signcolumns[i]
+		set_sign(buf, i, sign_name, reg.name)
+	end
+end
+
+local function fix_recurse(buf, lines)
+	if #lines == 26 then
+		return lines
+	end
+
+	local placed = vim.fn.sign_getplaced(buf, { group = "registers" })
+	local current_signs = {}
+	local signs = placed[1] and placed[1].signs or {}
+
+	for _, s in ipairs(signs) do
+		current_signs[tostring(s.lnum)] = s.name
+	end
+
+	-- check for missing lines
+	local line_count = vim.api.nvim_buf_line_count(buf)
+	local added = -1
+	local deleted = -1
+
+	for i = 1, line_count do
+		local current = current_signs[tostring(i)]
+		local expected = utils.ordered_signcolumns[i]
+
+		if not current then
+			added = i
+			break
+		end
+
+		if current ~= expected then
+			deleted = i
+			break
+		end
+	end
+
+	if deleted == -1 and added == -1 then
+		return lines
+	end
+
+	if added ~= -1 then
+		table.remove(lines, added)
+	else -- here deleted is not -1
+		table.insert(lines, deleted, "")
+		set_sign(buf, deleted, utils.ordered_signcolumns[deleted], utils.alphabet[deleted])
+	end
+
+	return fix_recurse(buf, lines)
+end
+
+local function track(buf)
+	local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+
+	lines = fix_recurse(buf, lines)
+	vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+	set_signs(buf, utils.get_registers())
+end
 
 function M.buf_name()
 	return keychain_buf_name
@@ -20,7 +120,6 @@ end
 
 function M.open()
 	local config = require("keychain.config").config
-	local utils = require("keychain.utils")
 
 	config.hooks.before_buf_create()
 
@@ -66,29 +165,15 @@ function M.open()
 	config.hooks.after_win_open(buf, win)
 
 	vim.api.nvim_set_option_value("numberwidth", 2, { win = win })
+	vim.api.nvim_set_option_value("signcolumn", "yes:1", { win = win })
+
+	set_signs(buf, regs)
 
 	if config.linenumbers then
 		local number = vim.api.nvim_get_option_value("number", { scope = "global" })
 		local relativenumber = vim.api.nvim_get_option_value("relativenumber", { scope = "global" })
 		vim.api.nvim_set_option_value("number", number, { win = win })
 		vim.api.nvim_set_option_value("relativenumber", relativenumber, { win = win })
-	end
-
-	-- setup sign column
-	vim.fn.sign_unplace("registers")
-
-	if config.signcolumn then
-		vim.api.nvim_set_option_value("signcolumn", "yes:1", { win = win })
-
-		for i, reg in ipairs(regs) do
-			local sign_name = "RegisterSign_" .. reg.name
-			pcall(vim.fn.sign_define, sign_name, {
-				text = reg.name,
-				texthl = "Comment",
-				numhl = "",
-			})
-			vim.fn.sign_place(1000 + i, "registers", sign_name, buf, { lnum = i })
-		end
 	end
 
 	-- handle :w to write back to registers
@@ -109,29 +194,13 @@ function M.open()
 			config.hooks.after_save(buf, win)
 		end,
 	})
-end
 
-local function get_all_keychain_windows(buf)
-	local wins = {}
-
-	for _, win in ipairs(vim.api.nvim_list_wins()) do
-		if vim.api.nvim_win_get_buf(win) == buf then
-			table.insert(wins, win)
-		end
-	end
-
-	return wins
-end
-
-local function handle_close(buf)
-	local config = require("keychain.config").config
-	local windows = get_all_keychain_windows(buf)
-
-	for _, win in ipairs(windows) do
-		config.hooks.before_win_close(buf, win)
-		vim.api.nvim_win_close(win, true)
-		config.hooks.after_win_close(buf)
-	end
+	vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI", "TextChangedP", "TextChangedT" }, {
+		buffer = buf,
+		callback = function()
+			track(buf)
+		end,
+	})
 end
 
 function M.close()

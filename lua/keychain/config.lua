@@ -10,13 +10,11 @@ local M = {}
 --- @field after_win_close? function<number>
 ---
 --- @class KeychainOpts
---- @field signcolumn? boolean
 --- @field linenumbers? boolean
 --- @field hooks? KeychainHooks
 
 --- @type KeychainOpts
 M.default_config = {
-	signcolumn = true,
 	linenumbers = true,
 	hooks = {
 		before_buf_create = function() end,

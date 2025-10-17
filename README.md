@@ -13,7 +13,6 @@ return {
 		-- configure keychain
 		--- @type KeychainOpts
 		local opts = {
-			signcolumn = true,
 			linenumbers = true,
 			hooks = {
 				before_buf_create = function() end,

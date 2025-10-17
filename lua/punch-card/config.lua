@@ -1,6 +1,6 @@
 local M = {}
 
---- @class KeychainHooks
+--- @class PunchCardHooks
 --- @field before_buf_create? function
 --- @field before_win_open? function<number>
 --- @field after_win_open? function<number, number>
@@ -9,11 +9,11 @@ local M = {}
 --- @field before_win_close? function<number, number>
 --- @field after_win_close? function<number>
 ---
---- @class KeychainOpts
+--- @class PunchCardOpts
 --- @field linenumbers? boolean
---- @field hooks? KeychainHooks
+--- @field hooks? PunchCardHooks
 
---- @type KeychainOpts
+--- @type PunchCardOpts
 M.default_config = {
 	linenumbers = true,
 	hooks = {
@@ -27,10 +27,10 @@ M.default_config = {
 	},
 }
 
---- @type KeychainOpts
+--- @type PunchCardOpts
 M.config = {}
 
---- @param opts KeychainOpts
+--- @param opts PunchCardOpts
 function M.configure(opts)
 	M.config = vim.tbl_deep_extend("force", M.default_config, opts or {})
 end

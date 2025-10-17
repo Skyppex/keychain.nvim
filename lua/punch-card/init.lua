@@ -1,17 +1,17 @@
---- @class Keychain
+--- @class PunchCard
 --- @field buf_name function
---- @field setup function<KeychainOpts>
+--- @field setup function<PunchCardOpts>
 --- @field open function
 --- @field close function
 --- @field save_and_close function
 
 local M = {}
 
-local utils = require("keychain.utils")
+local utils = require("punch-card.utils")
 
-local keychain_buf_name = "keychain://editor"
+local punch_card_buf_name = "punch-card://editor"
 
-local function get_all_keychain_windows(buf)
+local function get_all_punch_card_windows(buf)
 	local wins = {}
 
 	for _, win in ipairs(vim.api.nvim_list_wins()) do
@@ -24,8 +24,8 @@ local function get_all_keychain_windows(buf)
 end
 
 local function handle_close(buf)
-	local config = require("keychain.config").config
-	local wins = get_all_keychain_windows(buf)
+	local config = require("punch-card.config").config
+	local wins = get_all_punch_card_windows(buf)
 
 	for _, win in ipairs(wins) do
 		config.hooks.before_win_close(buf, win)
@@ -110,16 +110,16 @@ local function track(buf)
 end
 
 function M.buf_name()
-	return keychain_buf_name
+	return punch_card_buf_name
 end
 
---- @param opts KeychainOpts
+--- @param opts PunchCardOpts
 function M.setup(opts)
-	require("keychain.config").configure(opts)
+	require("punch-card.config").configure(opts)
 end
 
 function M.open()
-	local config = require("keychain.config").config
+	local config = require("punch-card.config").config
 
 	config.hooks.before_buf_create()
 
@@ -128,7 +128,7 @@ function M.open()
 	vim.api.nvim_set_option_value("buftype", "acwrite", { buf = buf })
 	vim.api.nvim_set_option_value("bufhidden", "wipe", { buf = buf })
 	vim.api.nvim_set_option_value("filetype", "registers", { buf = buf })
-	vim.api.nvim_buf_set_name(buf, keychain_buf_name)
+	vim.api.nvim_buf_set_name(buf, punch_card_buf_name)
 
 	-- gather all registers a–z
 	local regs = utils.get_registers()
@@ -204,12 +204,12 @@ function M.open()
 end
 
 function M.close()
-	local buf = vim.fn.bufnr(keychain_buf_name)
+	local buf = vim.fn.bufnr(punch_card_buf_name)
 	handle_close(buf)
 end
 
 function M.save_and_close()
-	local buf = vim.fn.bufnr(keychain_buf_name)
+	local buf = vim.fn.bufnr(punch_card_buf_name)
 
 	vim.api.nvim_buf_call(buf, function()
 		vim.cmd.write()

@@ -1,6 +1,6 @@
-# keychain.nvim
+# punch-card.nvim
 
-your keychain is a buffer which lets you edit your registers
+your punch-card is a buffer which lets you edit your registers
 
 ## installation
 
@@ -8,10 +8,10 @@ with lazy.nvim
 
 ```lua
 return {
-	"skyppex/keychain.nvim",
+	"skyppex/punch-card.nvim",
 	config = function()
-		-- configure keychain
-		--- @type KeychainOpts
+		-- configure punch-card
+		--- @type PunchCardOpts
 		local opts = {
 			linenumbers = true,
 			hooks = {
@@ -25,32 +25,32 @@ return {
 			},
 		}
 
-		require("keychain").setup(opts)
+		require("punch-card").setup(opts)
 	end,
 }
 ```
 
 ## usage
 
-to use `keychain` you have to use its api
+to use `punch-card` you have to use its api
 
 ```lua
--- import keychain and optionally give it its type for some lsp help
---- @type Keychain
-local keychain = require("keychain")
+-- import punch-card and optionally give it its type for some lsp help
+--- @type PunchCard
+local punch_card = require("punch-card")
 
--- open the keychain editor
+-- open the punch-card editor
 -- while you are editing, make sure to
 -- write the buffer with :w to save your changes
-keychain.open()
+punch_card.open()
 
--- close the keychain editor
--- this closes all windows with the keychain buffer if you have multiple
-keychain.close()
+-- close the punch-card editor
+-- this closes all windows with the punch-card buffer if you have multiple
+punch_card.close()
 
 -- you can also save and close in one go if you
 -- wish to avoid having to remember to save
-keychain.save_and_close()
+punch_card.save_and_close()
 ```
 
 ## contributing
@@ -61,4 +61,3 @@ before doing any work on a pr
 ## license - MIT
 
 see LICENSE file
-

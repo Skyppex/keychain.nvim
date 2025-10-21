@@ -53,6 +53,11 @@ punch_card.close()
 punch_card.save_and_close()
 ```
 
+## known issues
+
+- some poor behaviour when deleting multiple lines at once with `5d` and or visual selection.
+	- might lead to registers being duplicated or values moved between registers
+
 ## contributing
 
 issues and pull requests are welcome! please make an issue for feature requests

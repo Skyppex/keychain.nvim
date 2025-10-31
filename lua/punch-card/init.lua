@@ -139,6 +139,7 @@ function M.open()
 		reg_map[i] = reg.name
 	end
 
+	vim.api.nvim_set_option_value("textwidth", 0, { buf = buf })
 	vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
 	vim.api.nvim_buf_set_var(buf, "reg_map", reg_map)
 
